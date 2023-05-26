@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.ssafy.enjoytrip.comment.model.dao.CommentDao">
+
+	<resultMap type="commentDto" id="comment">
+ 		<result column="comment_no" property="commentNo"/>
+		<result column="article_no" property="articleNo"/>
+		<result column="user_id" property="userId"/>
+		<result column="content" property="content"/>
+		<result column="register_time" property="registerTime"/>
+	</resultMap>
+
+	<select id="listComment" parameterType="map" resultMap="comment">
+		SELECT comment_no, user_id, content, DATE_FORMAT(register_time, "%Y-%m-%d %H:%i:%S") as register_time
+		FROM comment
+		WHERE article_no = #{articleNo}
+		AND board_type = #{boardType}
+	</select>
+
+	<insert id="writeComment" parameterType="map">
+		INSERT INTO comment (board_type, article_no, user_id, content)
+		VALUES (#{boardType}, #{comment.articleNo}, #{comment.userId}, #{comment.content})
+	</insert>
+	
+	<update id="modifyComment" parameterType="map">
+		UPDATE comment
+		SET content = #{comment.content}
+		WHERE comment_no = #{comment.commentNo}
+		AND board_type = #{boardType}
+	</update>
+	
+	<delete id="deleteComment" parameterType="map">
+		DELETE FROM comment
+		WHERE comment_no = #{commentNo}
+		AND board_type = #{boardType}
+	</delete>
+
+</mapper>

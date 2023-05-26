@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.myplan.model.dao.MyPlanDao">
+
+    <resultMap type="map" id="article">
+        <result column="article_no" property="articleNo" />
+        <result column="user_id" property="userId" />
+        <result column="subject" property="subject" />
+        <result column="content" property="content" />
+        <result column="hit" property="hit" />
+        <result column="register_time" property="registerTime" />
+        <result column="share_check" property="shareCheck" />
+        <result column="name" property="name" />
+    </resultMap>
+
+    <resultMap type="myPlanDto" id="myPlan">
+        <result column="article_no" property="articleNo" />
+        <result column="user_id" property="userId" />
+        <result column="subject" property="subject" />
+        <result column="content" property="content" />
+        <result column="attraction_id_list" property="attractionIdList" />
+        <result column="hit" property="hit" />
+        <result column="register_time" property="registerTime" />
+        <result column="share_check" property="shareCheck" />
+    </resultMap>
+
+    <resultMap type="userDto" id="user">
+        <result column="id" property="id" />
+        <result column="password" property="password" />
+        <result column="name" property="name" />
+        <result column="email_id" property="emailId" />
+        <result column="email_domain" property="emailDomain" />
+        <result column="city_sido" property="citySido" />
+        <result column="city_gugun" property="cityGugun" />
+        <result column="user_grade" property="userGrade" />
+    </resultMap>
+
+    <insert id="writeArticle" parameterType="myPlanDto">
+        INSERT INTO myplan_board (user_id, subject, content, attraction_id_list, hit)
+        VALUES ( #{userId}, #{subject}, #{content}, #{attractionIdList}, 0)
+    </insert>
+
+    <sql id="search">
+        <if test="word != null and word != ''">
+            AND ${key} 
+            <choose>
+    			<when test="key == 'article_no'"> = #{word}</when>
+            	<otherwise>LIKE CONCAT('%', #{word}, '%')</otherwise>
+            </choose>
+        </if>
+    </sql>
+
+    <select id="listArticle" parameterType="map" resultMap="article">
+        SELECT article_no, user_id, subject, content, attraction_id_list, hit, DATE_FORMAT(register_time, "%Y-%m-%d %H:%i:%S") as register_time, share_check
+        FROM myplan_board
+        WHERE user_id = #{id}
+        <include refid="search"></include>
+        ORDER BY article_no DESC
+    </select>
+
+    <select id="getTotalArticleCount" parameterType="map" resultType="int">
+        SELECT COUNT(article_no)
+        FROM myplan_board
+        <where>
+            <include refid="search"></include>
+        </where>
+    </select>
+
+    <select id="getArticle" parameterType="int" resultMap="article">
+        SELECT m.article_no, m.user_id, m.subject, m.content, m.attraction_id_list, m.hit, m.register_time, m.share_check, u.name
+        FROM myplan_board m, user u
+        WHERE m.user_id = u.id
+        AND m.article_no = #{articleNo}
+    </select>
+
+    <update id="updateHit" parameterType="int">
+        UPDATE myplan_board
+        SET hit = hit + 1
+        WHERE article_no = #{articleNo}
+    </update>
+
+    <update id="modifyArticle" parameterType="myPlanDto">
+        UPDATE myplan_board
+        SET subject = #{subject}, content = #{content}, attraction_id_list = #{attractionIdList}
+        WHERE article_no = #{articleNo}
+    </update>
+
+    <delete id="deleteArticle" parameterType="int">
+        DELETE FROM myplan_board
+        WHERE article_no = #{articleNo}
+    </delete>
+    
+    <delete id="deleteAllArticle" parameterType="string">
+    	DELETE FROM myplan_board
+        WHERE user_id = #{userId}
+    </delete>
+
+	<!-- 게시글 공유 -->
+ 	<select id="shareArticle" parameterType="map" resultMap="article">
+        SELECT article_no, user_id, subject, content, attraction_id_list, hit, DATE_FORMAT(register_time, "%Y-%m-%d %H:%i:%S") as register_time, share_check
+        FROM myplan_board
+        WHERE share_check = 1
+        <include refid="search"></include>
+        ORDER BY article_no DESC
+    </select>
+    
+    <update id="updateShare" parameterType="int">
+        UPDATE myplan_board
+        SET share_check = 1
+        WHERE article_no = #{articleNo}
+    </update>
+    
+    <update id="updateNoShare" parameterType="int">
+        UPDATE myplan_board
+        SET share_check = 0
+        WHERE article_no = #{articleNo}
+    </update>
+</mapper>

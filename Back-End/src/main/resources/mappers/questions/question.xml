@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.question.model.dao.QuestionDao">
+
+    <resultMap type="map" id="article">
+        <result column="article_no" property="articleNo" />
+        <result column="user_id" property="userId" />
+        <result column="subject" property="subject" />
+        <result column="content" property="content" />
+        <result column="hit" property="hit" />
+        <result column="register_time" property="registerTime" />
+        <result column="name" property="name" />
+    </resultMap>
+
+    <resultMap type="questionDto" id="question">
+        <result column="article_no" property="articleNo" />
+        <result column="user_id" property="userId" />
+        <result column="subject" property="subject" />
+        <result column="content" property="content" />
+        <result column="hit" property="hit" />
+        <result column="register_time" property="registerTime" />
+    </resultMap>
+
+    <resultMap type="userDto" id="user">
+        <result column="id" property="id" />
+        <result column="password" property="password" />
+        <result column="name" property="name" />
+        <result column="email_id" property="emailId" />
+        <result column="email_domain" property="emailDomain" />
+        <result column="city_sido" property="citySido" />
+        <result column="city_gugun" property="cityGugun" />
+        <result column="user_grade" property="userGrade" />
+    </resultMap>
+
+    <insert id="writeArticle" parameterType="questionDto">
+        INSERT INTO question_board (user_id, subject, content, hit)
+        VALUES ( #{userId}, #{subject}, #{content}, 0)
+    </insert>
+
+    <sql id="search">
+        <if test="word != null and word != ''">
+            AND ${key} 
+            LIKE CONCAT('%', #{word}, '%')
+        </if>
+    </sql>
+
+    <select id="listArticle" parameterType="map" resultMap="article">
+        SELECT q.article_no, q.user_id, q.subject, q.content, q.hit, q.register_time, u.name
+        FROM question_board q, user u
+        WHERE q.user_id = u.id
+        <include refid="search"></include>
+        ORDER BY q.article_no DESC
+        LIMIT #{start}, #{listsize}
+    </select>
+
+    <select id="getTotalArticleCount" parameterType="map" resultType="int">
+        SELECT COUNT(article_no)
+        FROM question_board
+        <where>
+            <include refid="search"></include>
+        </where>
+    </select>
+
+    <select id="getArticle" parameterType="int" resultMap="article">
+        SELECT q.article_no, q.user_id, q.subject, q.content, q.hit, q.register_time, u.name
+        FROM question_board q, user u
+        WHERE q.user_id = u.id
+        AND q.article_no = #{articleNo}
+    </select>
+
+    <update id="updateHit" parameterType="int">
+        UPDATE question_board
+        SET hit = hit + 1
+        WHERE article_no = #{articleNo}
+    </update>
+
+    <update id="modifyArticle" parameterType="questionDto">
+        UPDATE question_board
+        SET subject = #{subject}, content = #{content}
+        WHERE article_no = #{articleNo}
+    </update>
+
+    <delete id="deleteArticle" parameterType="int">
+        DELETE FROM question_board
+        WHERE article_no = #{articleNo}
+    </delete>
+        
+</mapper>

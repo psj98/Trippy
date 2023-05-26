@@ -1,0 +1,27 @@
+- column name 맞추기 (하고싶으면 하기)
+
+- 변경된 DB에 따라 DTO, DAO, Service, Controller 변경
+
+- user
+  * sido, gugun에 따른 회원가입 목차 변경 및 저장
+  * DB 수정
+    > grade 추가 [나머지가 완성되면 추가 / ex. 관리자, 등급]
+
+- 나만의 여행 계획 (my_plan)
+  * DB 생성
+  * places는 attraction의 content_id를 구분자로 연결해서 저장
+    -> StringTokenizer로 Parsing 해서 content_id 마커를 찍고, 순서대로 여행 경로 띄움
+
+- 여행 계획 공유 (share_plan) 
+  * FK - my_plan (myplan_no)
+  * 따봉 추가 (추천) - 아이디 당 한 번 가능 (?)
+  * 기본 보기 / hit 순으로 정렬
+
+- board 나누기
+  * 자유 게시판 (board)
+  * 문의 게시판 (question_board)
+  * 공지 게시판 (notice_board)
+  * 정렬을 퀵 소트 or 머지 소트 (작성자, 조회수, 등록순 등) - 추후 (시간 남으면)
+
+- grade [나머지가 완성되면 추가]
+  * PK - user_grade (FK)

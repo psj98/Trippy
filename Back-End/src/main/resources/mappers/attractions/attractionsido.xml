@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.ssafy.enjoytrip.attraction.model.dao.IAttractionSidoDao">
+
+	<resultMap type="attractionSidoDto" id="sidoMap">
+		<result column="sido_code" property="sidoCode" />
+		<result column="sido_name" property="sidoName" />
+	</resultMap>
+
+	<select id="selectSido" resultMap="sidoMap" parameterType="int">
+		SELECT * 
+		FROM sido
+		WHERE sido_code = ${sidoCode}
+	</select>
+	
+	<select id="selectAll" resultMap="sidoMap">
+		SELECT * 
+		FROM sido
+	</select>
+	
+</mapper>

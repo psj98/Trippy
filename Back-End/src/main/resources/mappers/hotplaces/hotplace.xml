@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+
+    
+    
+<mapper namespace="com.ssafy.enjoytrip.hotplace.model.dao.HotplaceDao">
+
+	<insert id="plusLiked" parameterType="list">
+		INSERT INTO hotplace (content_id, date, liked) VALUES(#{no}, (current_date), 1)
+		ON DUPLICATE KEY 
+		UPDATE content_id = #{no}, liked = hotplace.liked + 1;
+	</insert>
+
+	<insert id="plusPlanned" parameterType="list">
+		<foreach collection="list" item="no">
+			INSERT INTO hotplace (content_id, date, planned) VALUES(#{no}, (current_date), 1)
+			ON DUPLICATE KEY 
+			UPDATE content_id = #{no}, planned = hotplace.planned + 1;
+		</foreach>
+	</insert>
+
+	<update id="minusPlanned" parameterType="list">
+		<foreach collection="list" item="no">
+			UPDATE hotplace 
+			SET planned = hotplace.planned - 1
+			WHERE content_id = #{no}
+			AND date = (current_date);
+		</foreach>
+	</update>
+
+	<select id="getTodaysAttr" resultType="map">
+		SELECT a.content_id, a.title, s.sido_name, g.gugun_name, h.liked 
+		FROM hotplace h, attraction_info a, sido s, gugun g 
+		WHERE h.content_id = a.content_id 
+		AND a.sido_code = s.sido_code 
+		AND a.gugun_code = g.gugun_code 
+		AND g.sido_code = s.sido_code 
+		AND date = (current_date) 
+		ORDER BY liked desc limit 5;
+	</select>
+
+
+</mapper>

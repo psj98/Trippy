@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.board.model.dao.BoardDao">
+
+    <resultMap type="map" id="article">
+        <result column="article_no" property="articleNo" />
+        <result column="user_id" property="userId" />
+        <result column="subject" property="subject" />
+        <result column="content" property="content" />
+        <result column="hit" property="hit" />
+        <result column="register_time" property="registerTime" />
+        <result column="name" property="name" />
+    </resultMap>
+
+    <resultMap type="boardDto" id="board">
+    	<result column="board_type" property="boardType"/>
+        <result column="article_no" property="articleNo" />
+        <result column="user_id" property="userId" />
+        <result column="subject" property="subject" />
+        <result column="content" property="content" />
+        <result column="hit" property="hit" />
+        <result column="register_time" property="registerTime" />
+    </resultMap>
+
+    <resultMap type="userDto" id="user">
+        <result column="id" property="id" />
+        <result column="password" property="password" />
+        <result column="name" property="name" />
+        <result column="email_id" property="emailId" />
+        <result column="email_domain" property="emailDomain" />
+        <result column="city_sido" property="citySido" />
+        <result column="city_gugun" property="cityGugun" />
+        <result column="user_grade" property="userGrade" />
+    </resultMap>
+    
+    <resultMap type="map" id="boardInfo">
+    	<result column="board_name" property="boardName"/>
+    	<result column="board_intro" property="boardIntro"/>
+    </resultMap>
+
+    <insert id="writeArticle" parameterType="map">
+        INSERT INTO article (board_type, article_no, user_id, subject, content)
+        VALUES ( 
+        #{boardType}, 
+        (SELECT ifnull(max(a.article_no), 0)+1 FROM article a WHERE board_type = #{boardType}), 
+        #{board.userId}, #{board.subject}, #{board.content})
+    </insert>
+
+    <sql id="search">
+        <if test="word != null and word != ''">
+            AND a.${key} 
+            <choose>
+    			<when test="key == 'article_no'"> = #{word}</when>
+            	<otherwise>LIKE CONCAT('%', #{word}, '%')</otherwise>
+            </choose>
+        </if>
+    </sql>
+
+	<select id="getBoardName" parameterType="string" resultMap="boardInfo">
+		SELECT board_name, board_intro
+		FROM board
+		WHERE board_type = #{boardType}
+	</select>
+
+    <select id="listArticle" parameterType="map" resultMap="article">
+        SELECT a.article_no, a.user_id, a.subject, a.content, a.hit, DATE_FORMAT(a.register_time, "%Y-%m-%d %H:%i:%S") as register_time, u.name
+        FROM article a, user u
+        WHERE a.board_type = #{boardType}
+        AND a.user_id = u.id
+        <include refid="search"></include>
+        ORDER BY a.article_no DESC
+        <!-- LIMIT #{start}, #{listsize} -->
+    </select>
+
+    <select id="getTotalArticleCount" parameterType="map" resultType="int">
+        SELECT COUNT(article_no)
+        FROM board
+        <where>
+            <include refid="search"></include>
+        </where>
+    </select>
+
+    <select id="getArticle" parameterType="map" resultMap="article">
+        SELECT a.article_no, a.user_id, a.subject, a.content, a.hit, a.register_time, u.name
+        FROM article a, user u
+        WHERE a.board_type = #{boardType}
+        AND a.user_id = u.id
+        AND a.article_no = #{articleNo}
+    </select>
+
+    <update id="updateHit" parameterType="map">
+        UPDATE article
+        SET hit = hit + 1
+        WHERE board_type = #{boardType}
+        AND article_no = #{articleNo}
+    </update>
+
+    <update id="modifyArticle" parameterType="map">
+        UPDATE article
+        SET subject = #{board.subject}, content = #{board.content}
+        WHERE board_type = #{boardType}
+        AND article_no = #{board.articleNo}
+    </update>
+
+    <delete id="deleteArticle" parameterType="map">
+        DELETE FROM comment
+        WHERE board_type = #{boardType}
+        AND article_no = #{articleNo};
+        
+        DELETE FROM article
+        WHERE board_type = #{boardType}
+        AND article_no = #{articleNo};
+    </delete>
+
+	<!--<resultMap type="boardDto" id="viewArticle" extends="article">
+    		<collection property="fileInfos" column="article_no" javaType="list" ofType="fileInfoDto" select="fileInfoList"/>
+    	</resultMap>
+    	
+    	<resultMap type="fileInfoDto" id="file"> 
+    		<result column="save_folder" property="saveFolder"/>
+	        <result column="original_file" property="originalFile"/>
+	        <result column="save_file" property="saveFile"/> 
+        </resultMap> -->
+        
+	<!-- <select id="fileInfoList" resultMap="file"> select save_folder, original_file, 
+	        save_file from file_info where article_no = #{articleNo} </select> -->
+
+    <!-- <insert id="registerFile" parameterType="boardDto"> insert into file_info 
+        (article_no, save_folder, original_file, save_file) values <foreach collection="fileInfos" 
+        item="fileinfo" separator=" , "> (#{articleNo}, #{fileinfo.saveFolder}, #{fileinfo.originalFile}, 
+        #{fileinfo.saveFile}) </foreach> </insert> -->
+        	        
+	<!-- <delete id="deleteFile" parameterType="int"> delete from file_info 
+	        where article_no = #{articleNo} </delete> -->
+        
+</mapper>

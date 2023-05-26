@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.ssafy.enjoytrip.attraction.model.dao.IAttractionGuGunDao">
+
+	<select id="selectGuGun" resultType="attractionGuGunDto" parameterType="int">
+		SELECT DISTINCT(gugun_code), gugun_name, sido_code
+		FROM gugun
+		WHERE sido_code=#{sido_code}
+	</select>
+	
+	<select id="selectGuGunName" resultType="string" parameterType="int">
+		SELECT gugun_name 
+		FROM gugun 
+		WHERE gugun_code=#{gugun_code}
+	</select>
+	
+</mapper>
